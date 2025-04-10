@@ -1,5 +1,6 @@
 
 from math import * 
+from cmath import *
 import numpy as np
 import os
 
@@ -66,5 +67,9 @@ def clear_var( cls=False ):
     if cls:
         clear()
     
+def clv():
+    clear_var(True)
+
+
 # save things not to be cleared
 clear_prot = list(globals().keys())
