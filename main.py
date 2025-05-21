@@ -70,6 +70,7 @@ def clear_var( cls=False ):
 def clv():
     clear_var(True)
 
+j = 1j
 
 # save things not to be cleared
 clear_prot = list(globals().keys())
