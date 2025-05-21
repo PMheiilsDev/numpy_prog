@@ -3,6 +3,7 @@ from math import *
 from cmath import *
 import numpy as np
 import os
+import sys
 
 def help():
     print()
@@ -53,6 +54,12 @@ def clear():
     os.system("cls")
     return None
     
+def store_last_result(value):
+    if value is not None:
+        globals()['ans'] = value
+        print(value)
+
+sys.displayhook = store_last_result
 
 # clear function
 clear_prot = []
