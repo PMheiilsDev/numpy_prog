@@ -1,6 +1,6 @@
 
 from math import * 
-from cmath import *
+import cmath as c
 import numpy as np
 import os
 import sys
