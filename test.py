@@ -291,17 +291,10 @@ REPL_LOCALS['quit'] = _exit_completely
 
 # ---------- START REPL --------------------------------------------------------
 def start_repl():
-    banner = (
-        "Custom Python REPL with toolbox (C1, E3, B1, assignment prints):\n"
-        "- expressions: printed & stored in ans & ans_list\n"
-        "- assignments: printed & stored in ans & ans_list\n"
-        "- multi-line blocks: executed; ans becomes replay callable & stored in ans_list\n"
-        "- calling ans() replays block output, no trailing None\n"
-        "- exit / exit() / quit() closes terminal\n"
-        "- Toolbox: np, c (cmath), math names, E_mat, mat_inv, mat_det, mat_times, mat_solve, vec_* helpers, clear_var(), clv(), clear()\n"
-    )
+    banner = ""
     console = AnsInteractiveConsole(locals=REPL_LOCALS)
     console.interact(banner=banner)
 
 if __name__ == "__main__":
+    os.system("color 02")
     start_repl()
