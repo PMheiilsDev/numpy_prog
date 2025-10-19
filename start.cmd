@@ -2,4 +2,4 @@
 
 @echo off
 
-python -i .\main.py 
+python -i .\test.py 
