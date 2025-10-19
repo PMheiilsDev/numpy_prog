@@ -83,7 +83,6 @@ class AnsInteractiveConsole(code.InteractiveConsole):
                 self.locals['ans_list'].append(value)
                 print(_repr_for_display(value))
 
-
             sys.displayhook = _capture_displayhook
 
             # detect direct ans() to suppress trailing None
@@ -175,7 +174,6 @@ class AnsInteractiveConsole(code.InteractiveConsole):
 
 # ---------- TOOLBOX --------------------------------------------------------
 
-# REPL namespace
 REPL_LOCALS = {}
 
 # imports
@@ -244,11 +242,13 @@ def clear():
     os.system("cls" if os.name == "nt" else "clear")
 REPL_LOCALS['clear'] = clear
 
-# clear_var & clv (Option A)
+# ---------- clear_var & clv (Option A) ------------------------------------------------
 def clear_var(cls=False):
+    """Clear all user variables except protected ones."""
+    protected = REPL_LOCALS.get('_clear_prot_', set())
     keys = list(REPL_LOCALS.keys())
     for k in keys:
-        if k in REPL_LOCALS['_clear_prot_']:
+        if k in protected:
             continue
         if k == '__builtins__':
             continue
@@ -258,13 +258,14 @@ def clear_var(cls=False):
             pass
     if cls:
         clear()
-REPL_LOCALS['clear_var'] = clear_var
 
 def clv():
     clear_var(True)
+
+REPL_LOCALS['clear_var'] = clear_var
 REPL_LOCALS['clv'] = clv
 
-# protected keys
+# Initialize protected keys AFTER all toolbox functions are defined
 protected = set(REPL_LOCALS.keys())
 protected.add('__builtins__')
 REPL_LOCALS['_clear_prot_'] = protected
@@ -296,5 +297,6 @@ def start_repl():
     console.interact(banner=banner)
 
 if __name__ == "__main__":
-    os.system("color 02")
+    if os.name == "nt":
+        os.system("color 02")
     start_repl()
