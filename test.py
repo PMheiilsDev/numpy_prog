@@ -19,6 +19,7 @@ import sys
 import os
 import numpy as np
 import cmath as c
+import sympy as sp
 from math import *
 from types import FunctionType
 from typing import Optional
