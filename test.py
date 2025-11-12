@@ -24,6 +24,16 @@ from math import *
 from types import FunctionType
 from typing import Optional
 
+# ---------- Resistor Class --------------------------------------------------------
+
+class Resistor(float):
+    """A class that behaves like a float but supports parallel resistance with | operator."""
+    def __or__(self, other):
+        if not isinstance(other, (Resistor, int, float)):
+            return NotImplemented
+        return Resistor((self * other) / (self + other))  # Parallel resistance
+
+
 # ---------- REPL CORE --------------------------------------------------------
 
 def _is_block_node(node: ast.AST) -> bool:
@@ -86,9 +96,8 @@ class AnsInteractiveConsole(code.InteractiveConsole):
 
             sys.displayhook = _capture_displayhook
 
-            # detect direct ans() to suppress trailing None
-            use_exec_instead = False
             src = self._last_source or ""
+            use_exec_instead = False
             try:
                 parsed = ast.parse(src, mode='exec')
                 if len(parsed.body) == 1 and isinstance(parsed.body[0], ast.Expr):
@@ -96,7 +105,23 @@ class AnsInteractiveConsole(code.InteractiveConsole):
                     if isinstance(expr, ast.Call) and isinstance(expr.func, ast.Name) and expr.func.id == 'ans':
                         use_exec_instead = True
             except SyntaxError:
-                use_exec_instead = False
+                pass
+
+            # --- Custom resistor-aware assignment ---
+            if "=" in src:
+                try:
+                    var, expr = map(str.strip, src.split("=", 1))
+                    if (var.startswith("R") or var.startswith("r")) and not src.strip().startswith("#"):
+                        value = eval(expr, self.locals)
+                        if isinstance(value, (int, float)):
+                            value = Resistor(value)
+                        self.locals[var] = value
+                        self.locals["ans"] = value
+                        self.locals["ans_list"].append(value)
+                        # print(_repr_for_display(value))
+                        return
+                except Exception:
+                    pass
 
             if use_exec_instead:
                 exec(compile(src, "<input>", "exec"), globals(), self.locals)
