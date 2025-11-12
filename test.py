@@ -69,11 +69,32 @@ def _repr_for_display(value):
         return "<unrepresentable>"
 
 class AnsInteractiveConsole(code.InteractiveConsole):
+    autoprint = True  
+
     def __init__(self, locals=None, filename="<input>"):
         super().__init__(locals=locals, filename=filename)
         self.locals.setdefault('ans', None)
         self.locals.setdefault('ans_list', [])
         self._last_source = None
+
+        # register toggle functions in REPL_LOCALS for access
+        self.locals['toggle_autoprint'] = self.toggle_autoprint
+        self.locals['tap'] = self.toggle_autoprint
+
+    def toggle_autoprint(self, state=None):
+        """
+        Toggle autoprint:
+          tap()          -> toggle
+          tap(1) / True  -> turn on
+          tap(0) / False -> turn off
+        """
+        if state is None:
+            AnsInteractiveConsole.autoprint = not AnsInteractiveConsole.autoprint
+        else:
+            AnsInteractiveConsole.autoprint = bool(state)
+        s = "ON" if AnsInteractiveConsole.autoprint else "OFF"
+        print(f"[autoprint: {s}]")
+
 
     def runsource(self, source, filename="<input>", symbol="single"):
         self._last_source = source
@@ -88,11 +109,13 @@ class AnsInteractiveConsole(code.InteractiveConsole):
                     return
                 # Skip appending if value is exactly ans or ans_list themselves
                 if value is self.locals.get('ans') or value is self.locals.get('ans_list'):
-                    print(_repr_for_display(value))
+                    if AnsInteractiveConsole.autoprint:
+                        print(_repr_for_display(value))
                     return
                 self.locals['ans'] = value
                 self.locals['ans_list'].append(value)
-                print(_repr_for_display(value))
+                if AnsInteractiveConsole.autoprint:
+                    print(_repr_for_display(value))
 
             sys.displayhook = _capture_displayhook
 
@@ -118,7 +141,6 @@ class AnsInteractiveConsole(code.InteractiveConsole):
                         self.locals[var] = value
                         self.locals["ans"] = value
                         self.locals["ans_list"].append(value)
-                        # print(_repr_for_display(value))
                         return
                 except Exception:
                     pass
@@ -162,7 +184,8 @@ class AnsInteractiveConsole(code.InteractiveConsole):
                                         return
                                     self.locals['ans'] = value
                                     self.locals['ans_list'].append(value)
-                                    print(_repr_for_display(value))
+                                    if AnsInteractiveConsole.autoprint:
+                                        print(_repr_for_display(value))
                                 sys.displayhook = _no_display
                                 try:
                                     exec(compile(s, "<ans-replay>", "exec"), globals(), self.locals)
@@ -191,7 +214,8 @@ class AnsInteractiveConsole(code.InteractiveConsole):
                                 val = self.locals[name]
                                 self.locals['ans'] = val
                                 self.locals['ans_list'].append(val)
-                                print(_repr_for_display(val))
+                                if AnsInteractiveConsole.autoprint:
+                                    print(_repr_for_display(val))
                             except Exception:
                                 pass
                 except Exception:
